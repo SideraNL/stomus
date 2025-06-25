@@ -151,6 +151,23 @@
             newButton.classList.add('opacity-50', 'cursor-not-allowed');
             reportOutput.innerHTML = '';
             copyButton.classList.add('hidden');
+            
+            // ===================================================================
+            // IMPORTANTE: Incolla qui la tua chiave API di Google AI Studio
+            // ===================================================================
+            const apiKey = "AIzaSyAMJ_QB3WyP6D0JAuIF0y1puN4dkT6dszA"; 
+            // ===================================================================
+
+            if (apiKey === "INCOLLA_QUI_LA_TUA_CHIAVE_API") {
+                reportOutput.innerHTML = `<p class="text-red-600 text-center"><b>Errore:</b> Chiave API non inserita. Segui le istruzioni per ottenere e inserire la tua chiave API nel codice.</p>`;
+                loadingSpinner.classList.add('hidden');
+                generateButton.disabled = false;
+                newButton.disabled = false;
+                generateButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                newButton.classList.remove('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+
 
             const prompt = `
                 In qualità di musicologo e storico della musica di grande esperienza, redigi un report dettagliato e ben strutturato sull'argomento: "${topic}".
@@ -166,7 +183,6 @@
             try {
                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
-                const apiKey = "";
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                 const response = await fetch(apiUrl, {
                     method: 'POST',
