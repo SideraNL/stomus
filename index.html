@@ -55,7 +55,25 @@
 </head>
 <body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
 
-    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-2xl p-8 md:p-12 transform transition-all duration-500">
+    <!-- Modale per la Chiave API -->
+    <div id="apiKeyModal" class="fixed inset-0 bg-gray-900 bg-opacity-80 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-gray-900">
+            <h2 class="text-2xl font-bold font-serif-display mb-4">Inserisci la tua Chiave API</h2>
+            <p class="mb-4 text-gray-600">Per utilizzare questa applicazione, hai bisogno di una chiave API gratuita da Google AI Studio.</p>
+            <ol class="list-decimal list-inside mb-6 text-gray-600 space-y-2">
+                <li>Vai su <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-teal-600 hover:underline font-semibold">Google AI Studio</a>.</li>
+                <li>Crea una nuova chiave API ("Create API key").</li>
+                <li>Copia e incolla la chiave qui sotto.</li>
+            </ol>
+            <input type="password" id="apiKeyInput" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500" placeholder="Incolla la tua chiave qui">
+            <p id="apiKeyError" class="text-red-500 text-sm mt-2 hidden">Per favore, inserisci una chiave API valida.</p>
+            <button id="saveApiKeyButton" class="mt-6 w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">Salva e Continua</button>
+        </div>
+    </div>
+
+
+    <!-- Applicazione Principale (nascosta all'inizio) -->
+    <div id="mainApp" class="hidden w-full max-w-3xl bg-white rounded-2xl shadow-2xl p-8 md:p-12 transform transition-all duration-500">
         <!-- Intestazione -->
         <div class="text-center mb-8">
             <h1 class="text-4xl md:text-5xl font-bold text-gray-900 font-serif-display">Storia della Musica</h1>
@@ -68,15 +86,11 @@
             <input type="text" id="topicInput" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition" placeholder="Es: 'Il contrappunto in Bach', 'L'impressionismo musicale', 'Vivaldi e Le Quattro Stagioni'">
             <div class="flex space-x-2">
                 <button id="generateButton" class="w-full bg-teal-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10.392C2.057 15.71 3.245 16 4.5 16h1.054c.254.675.645 1.293 1.125 1.825A5.002 5.002 0 0012 20a5.002 5.002 0 005.32-7.175c.48-.532.87-1.15 1.125-1.825H19.5c1.255 0 2.443-.29 3.5-.804V4.804C21.943 4.29 20.755 4 19.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10.392C2.057 15.71 3.245 16 4.5 16h1.054c.254.675.645 1.293 1.125 1.825A5.002 5.002 0 0012 20a5.002 5.002 0 005.32-7.175c.48-.532.87-1.15 1.125-1.825H19.5c1.255 0 2.443-.29 3.5-.804V4.804C21.943 4.29 20.755 4 19.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" /></svg>
                     Genera Report
                 </button>
                  <button id="newButton" class="w-auto bg-gray-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition duration-300 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     Nuova
                 </button>
             </div>
@@ -84,36 +98,58 @@
 
         <!-- Area di Output -->
         <div id="resultWrapper" class="relative">
-            <!-- Spinner di caricamento -->
             <div id="loadingSpinner" class="hidden absolute inset-0 bg-white bg-opacity-75 flex flex-col items-center justify-center rounded-lg z-10">
                 <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24 mb-4"></div>
                 <p class="text-gray-700 font-semibold text-lg">Ricerca in corso negli archivi musicali...</p>
             </div>
-            
-            <!-- Contenuto del report -->
             <div id="reportContainer" class="bg-gray-50 p-6 rounded-lg min-h-[200px] text-gray-800">
                 <div id="reportOutput" class="prose max-w-none">
                     <p class="text-gray-500 text-center">Il tuo report sulla storia della musica apparirà qui.</p>
                 </div>
-                 <button id="copyButton" class="hidden mt-6 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition duration-300">
-                    Copia Testo
-                </button>
+                 <button id="copyButton" class="hidden mt-6 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition duration-300">Copia Testo</button>
             </div>
         </div>
     </div>
 
     <script type="module">
-        // Get references to DOM elements
+        // Elementi UI
+        const mainApp = document.getElementById('mainApp');
+        const apiKeyModal = document.getElementById('apiKeyModal');
+        const apiKeyInput = document.getElementById('apiKeyInput');
+        const saveApiKeyButton = document.getElementById('saveApiKeyButton');
+        const apiKeyError = document.getElementById('apiKeyError');
+
         const topicInput = document.getElementById('topicInput');
         const generateButton = document.getElementById('generateButton');
         const newButton = document.getElementById('newButton');
-        const reportContainer = document.getElementById('reportContainer');
         const reportOutput = document.getElementById('reportOutput');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const copyButton = document.getElementById('copyButton');
         const initialPlaceholder = '<p class="text-gray-500 text-center">Il tuo report sulla storia della musica apparirà qui.</p>';
         
-        // --- Event Listeners ---
+        // Variabile per conservare la chiave
+        let userApiKey = null;
+
+        // --- Gestione Chiave API ---
+        saveApiKeyButton.addEventListener('click', () => {
+            const key = apiKeyInput.value.trim();
+            if (key) {
+                userApiKey = key;
+                apiKeyModal.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+            } else {
+                apiKeyError.classList.remove('hidden');
+            }
+        });
+
+        apiKeyInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                saveApiKeyButton.click();
+            }
+        });
+
+
+        // --- Funzionalità App Principale ---
         generateButton.addEventListener('click', generateReport);
         newButton.addEventListener('click', startNewSearch);
         topicInput.addEventListener('keydown', (event) => {
@@ -123,9 +159,6 @@
         });
         copyButton.addEventListener('click', copyReportText);
 
-        /**
-         * Clears the input and output to start a new search.
-         */
         function startNewSearch() {
             topicInput.value = '';
             reportOutput.innerHTML = initialPlaceholder;
@@ -133,14 +166,16 @@
             topicInput.focus();
         }
 
-        /**
-         * Main function to generate the report.
-         */
         async function generateReport() {
             const topic = topicInput.value.trim();
             if (!topic) {
                 reportOutput.innerHTML = '<p class="text-red-500 text-center font-semibold">Per favore, inserisci un argomento valido.</p>';
                 topicInput.focus();
+                return;
+            }
+
+            if (!userApiKey) {
+                alert("Errore: Chiave API non disponibile.");
                 return;
             }
 
@@ -152,23 +187,6 @@
             reportOutput.innerHTML = '';
             copyButton.classList.add('hidden');
             
-            // ===================================================================
-            // IMPORTANTE: Incolla qui la tua chiave API di Google AI Studio
-            // ===================================================================
-            const apiKey = "AIzaSyAMJ_QB3WyP6D0JAuIF0y1puN4dkT6dszA"; 
-            // ===================================================================
-
-            if (apiKey === "INCOLLA_QUI_LA_TUA_CHIAVE_API") {
-                reportOutput.innerHTML = `<p class="text-red-600 text-center"><b>Errore:</b> Chiave API non inserita. Segui le istruzioni per ottenere e inserire la tua chiave API nel codice.</p>`;
-                loadingSpinner.classList.add('hidden');
-                generateButton.disabled = false;
-                newButton.disabled = false;
-                generateButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                newButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                return;
-            }
-
-
             const prompt = `
                 In qualità di musicologo e storico della musica di grande esperienza, redigi un report dettagliato e ben strutturato sull'argomento: "${topic}".
                 Il report deve essere scritto interamente in italiano.
@@ -183,7 +201,7 @@
             try {
                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
                 const payload = { contents: chatHistory };
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${userApiKey}`;
                 const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -199,7 +217,11 @@
                 copyButton.classList.remove('hidden');
             } catch (error) {
                 console.error('Errore durante la chiamata API:', error);
-                reportOutput.innerHTML = `<p class="text-red-600 text-center">Si è verificato un errore. Impossibile contattare il servizio di generazione. Dettagli: ${error.message}</p>`;
+                let errorMessage = `Si è verificato un errore. Dettagli: ${error.message}`;
+                if (error.message.includes("403")) {
+                    errorMessage += ". Potrebbe essere un problema con la tua chiave API. Assicurati che sia corretta e attiva."
+                }
+                reportOutput.innerHTML = `<p class="text-red-600 text-center">${errorMessage}</p>`;
             } finally {
                 loadingSpinner.classList.add('hidden');
                 generateButton.disabled = false;
